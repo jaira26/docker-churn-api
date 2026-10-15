@@ -1,0 +1,36 @@
+name: docker-build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build serving image (trains the model during the build)
+        run: docker build -t churn-api:ci .
+
+      - name: Show image size
+        run: docker image ls churn-api:ci
+
+      - name: Smoke test the container
+        run: bash scripts/smoke_test.sh churn-api:ci
+
+      - name: Run the compose stack end to end
+        run: |
+          docker compose up -d --build
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:8000/health && break
+            sleep 3
+          done
+          curl -fsS -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            --data @scripts/sample_customer.json
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

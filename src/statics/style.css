@@ -1,0 +1,218 @@
+:root {
+  --paper: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #17202c;
+  --muted: #566273;
+  --rule: #cdd4dd;
+  --brand: #22508c;
+  --risk-high: #b42318;
+  --risk-low: #1d7349;
+  --focus: #2f6fd0;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #12171e;
+    --surface: #1b222c;
+    --ink: #e6ebf1;
+    --muted: #9aa6b5;
+    --rule: #333e4c;
+    --brand: #7fa8e6;
+    --risk-high: #f0786c;
+    --risk-low: #5cc48f;
+    --focus: #8db7f5;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.5 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.masthead {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1rem;
+}
+
+.masthead h1 {
+  margin: 0;
+  font: 600 clamp(2rem, 5vw, 3rem)/1.05 "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.masthead p {
+  margin: 0.5rem 0 0;
+  max-width: 38rem;
+  color: var(--muted);
+}
+
+.layout {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 2rem;
+  align-items: start;
+}
+
+fieldset {
+  margin: 0 0 1.5rem;
+  padding: 0;
+  border: 0;
+  border-top: 2px solid var(--ink);
+}
+
+legend {
+  padding: 0.75rem 0 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.75rem 1rem;
+  padding-top: 0.75rem;
+}
+
+.field span {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+select, input {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+select:focus-visible, input:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  background: var(--brand);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  button { color: #0f1620; }
+}
+
+button:disabled { opacity: 0.6; cursor: progress; }
+
+.panel {
+  position: sticky;
+  top: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.result-figure {
+  margin: 0;
+  font: 600 4.5rem/1 "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.result.high .result-figure { color: var(--risk-high); }
+.result.low .result-figure { color: var(--risk-low); }
+
+.result-caption {
+  margin: 0.5rem 0 1rem;
+  color: var(--muted);
+}
+
+.result.error .result-caption { color: var(--risk-high); }
+
+.meter {
+  position: relative;
+  height: 0.75rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  width: 0;
+  background: var(--muted);
+  transition: width 400ms ease-out;
+}
+
+.result.high .meter-fill { background: var(--risk-high); }
+.result.low .meter-fill { background: var(--risk-low); }
+
+.meter-threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--ink);
+}
+
+.meter-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.model-card {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.model-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+.model-card dt { color: var(--muted); }
+.model-card dd { margin: 0; font-variant-numeric: tabular-nums; text-transform: capitalize; }
+
+.links {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+}
+
+.links a { color: var(--brand); }
+
+@media (max-width: 52rem) {
+  .layout { grid-template-columns: 1fr; }
+  .panel { position: static; order: -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter-fill { transition: none; }
+}

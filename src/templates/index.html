@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Churn risk check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/statics/style.css">
+</head>
+<body>
+  <header class="masthead">
+    <h1>Churn risk check</h1>
+    <p>Score one telecom customer against the trained model. Change any field and run the check again.</p>
+  </header>
+
+  <main class="layout">
+    <form id="customer-form" class="form" novalidate>
+      {% for group in groups %}
+      <fieldset>
+        <legend>{{ group.title }}</legend>
+        <div class="grid">
+          {% for c in group.controls %}
+          <label class="field">
+            <span>{{ c.label }}</span>
+            {% if c.kind == "select" %}
+            <select name="{{ c.name }}">
+              {% for opt in c.options %}
+              <option value="{{ opt }}" {% if opt == c.default %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <input type="number" name="{{ c.name }}" value="{{ c.default }}" min="0" step="{{ c.step }}" required>
+            {% endif %}
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+      <button type="submit">Check churn risk</button>
+    </form>
+
+    <aside class="panel" aria-live="polite">
+      <div id="result" class="result idle">
+        <p class="result-figure" id="result-figure">--</p>
+        <p class="result-caption" id="result-caption">Run a check to see this customer's churn probability.</p>
+        <div class="meter" role="img" aria-label="Churn probability meter">
+          <div class="meter-fill" id="meter-fill"></div>
+          <div class="meter-threshold" style="left: {{ (threshold * 100) | round(1) }}%"></div>
+        </div>
+        <p class="meter-note">Line marks the decision threshold ({{ (threshold * 100) | round | int }}%).</p>
+      </div>
+
+      {% if metrics %}
+      <dl class="model-card">
+        <div><dt>Model</dt><dd>{{ metrics.selected_model | replace("_", " ") }}</dd></div>
+        <div><dt>Test ROC-AUC</dt><dd>{{ metrics.test.roc_auc }}</dd></div>
+        <div><dt>Test recall</dt><dd>{{ metrics.test.recall }}</dd></div>
+        <div><dt>Test precision</dt><dd>{{ metrics.test.precision }}</dd></div>
+        <div><dt>Trained</dt><dd>{{ metrics.trained_at[:10] }}</dd></div>
+      </dl>
+      {% endif %}
+      <p class="links"><a href="/docs">API docs</a> <a href="/model-info">Model info (JSON)</a></p>
+    </aside>
+  </main>
+
+  <script src="/statics/app.js"></script>
+</body>
+</html>

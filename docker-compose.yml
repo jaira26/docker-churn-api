@@ -1,0 +1,31 @@
+services:
+  # Service 1: retrain the model and write it to the shared volume, then exit.
+  trainer:
+    build:
+      context: .
+      target: train-base
+    image: churn-trainer:latest
+    command: ["python", "train.py", "--data", "data/telco_churn.csv", "--out", "/exchange"]
+    volumes:
+      - model_exchange:/exchange
+
+  # Service 2: serve whatever model the trainer just wrote.
+  api:
+    build:
+      context: .
+      target: serve-base
+    image: churn-api-runtime:latest
+    environment:
+      MODEL_DIR: /exchange
+      CHURN_THRESHOLD: "0.5"
+    ports:
+      - "8000:8000"
+    volumes:
+      - model_exchange:/exchange:ro
+    depends_on:
+      trainer:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  model_exchange:
