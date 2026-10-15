@@ -1,5 +1,7 @@
 # Containerized Churn Prediction API
 
+[![docker-build](https://github.com/jaira26/docker-churn-api/actions/workflows/docker-ci.yml/badge.svg)](https://github.com/jaira26/docker-churn-api/actions/workflows/docker-ci.yml)
+
 A customer churn model for the IBM Telco dataset, trained and served in Docker. The project builds on Lab 2 of the Docker Labs in [raminmohammadi/MLOps](https://github.com/raminmohammadi/MLOps/tree/main/Labs/Docker_Labs/Lab2) and keeps its two core ideas:
 
 - a multi-stage build that trains in one stage and ships only the model, and
@@ -83,7 +85,7 @@ curl -X POST http://localhost:8000/predict \
 The response looks like this (the probability depends on your trained model):
 
 ```json
-{"churn_probability": 0.7312, "will_churn": true, "threshold": 0.5, "model": "logistic_regression"}
+{"churn_probability": 0.9139, "will_churn": true, "threshold": 0.5, "model": "logistic_regression"}
 ```
 
 | Endpoint | Method | Purpose |
@@ -98,25 +100,29 @@ The decision threshold defaults to 0.5. Override it with `CHURN_THRESHOLD`, for 
 
 ## Results
 
-Fill these in from `/model-info` after your first build.
+Trained on 5,634 customers and evaluated on 1,409 held-out customers (26.5% churn rate).
 
 | Metric | Value |
 |---|---|
-| Selected model | |
-| CV ROC-AUC (logistic regression) | |
-| CV ROC-AUC (gradient boosting) | |
-| Test ROC-AUC | |
-| Test recall | |
-| Test precision | |
+| Selected model | Logistic regression |
+| CV ROC-AUC (logistic regression) | 0.846 ± 0.012 |
+| CV ROC-AUC (gradient boosting) | 0.844 ± 0.009 |
+| Test ROC-AUC | 0.842 |
+| Test recall | 0.783 (293 of 374 churners caught) |
+| Test precision | 0.504 |
+
+The two candidates are within one standard deviation of each other in cross-validation, so the simpler, more interpretable model was kept. Balanced class weights favor recall over precision, which suits retention work: missing a churner usually costs more than an unneeded retention offer.
 
 ## Image size comparison
 
-Build the original lab and this project, then run `docker image ls`.
+Measured with `docker image ls` on Docker Desktop (Windows, WSL 2).
 
-| Image | Size |
-|---|---|
-| Original Lab 2 serving image (`python:3.10` + TensorFlow) | |
-| This project's serving image (`python:3.11-slim` + scikit-learn) | |
+| Image | Disk usage | Content size |
+|---|---|---|
+| Original Lab 2 serving image (`python:3.10` + TensorFlow) | 5.36 GB | 1.64 GB |
+| This project's serving image (`python:3.11-slim` + scikit-learn) | 696 MB | 159 MB |
+
+About 87% smaller on disk and about 10x smaller compressed.
 
 ## Testing
 
@@ -138,7 +144,7 @@ The GitHub Actions workflow in `.github/workflows/docker-ci.yml` runs the same c
 ├── requirements-train.txt
 ├── requirements-serve.txt
 ├── data/
-│   └── telco_churn.csv      # add this yourself (see Setup)
+│   └── telco_churn.csv      # IBM Telco Customer Churn (Kaggle)
 ├── src/
 │   ├── train.py             # CV model selection, test evaluation, artifact export
 │   ├── app.py               # FastAPI app
